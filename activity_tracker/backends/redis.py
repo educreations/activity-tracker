@@ -7,7 +7,7 @@ import logging
 
 import redis
 
-from ..base import BaseBackend
+from .base import BaseBackend
 from ..tracker import ActivityTracker
 
 log = logging.getLogger(__name__)

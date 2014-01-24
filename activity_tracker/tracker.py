@@ -1,6 +1,6 @@
 import importlib
 
-from .base import BaseBackend
+from .backends.base import BaseBackend
 
 __all__ = ['ActivityTracker']
 
