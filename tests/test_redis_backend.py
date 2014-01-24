@@ -31,7 +31,7 @@ class RedisBackendTestCase(unittest.TestCase):
             redis_backend.redis = fake_redis
         self.backend = redis_backend.RedisBackend(
             db=int(os.environ.get(REAL_REDIS_ENV, '0')))
-        self.conn = self.backend.get_conn(None)
+        self.conn = self.backend.get_conn(0)
         self.conn.flushdb()
 
     def tearDown(self):

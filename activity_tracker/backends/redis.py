@@ -24,11 +24,26 @@ class RedisBackend(BaseBackend):
         collapse() converts them to keys like:
             active:<timeperiod>[:<bucket>] -> count
 
+    Sharding:
+        All data for a given time period / bucket pair must be stored on the
+        same redis server in the same database. If multiple buckets are used
+        together in a track call (bucket=, old_bucket=) or a collapse call,
+        they must also be in the same database. If you are using this library
+        to track multiple independent data sets, you can use its builtin
+        sharding feature. To do so, provide any overrides for the connection or
+        database parameters in the 'shards' keyword argument, like:
+            shards=[{}, {'db': 1}, {'host': 'server2'}]
+        and provide the appropriate shard=N argument to the track/collapse/
+        lookup calls.
+
     Keyword arguments:
         host:           Default redis host. Defaults to 'localhost'.
         port:           Default redis port. Defaults to 6379.
         db:             Default redis db. Defaults to 0.
         socket_timeout: Socket timeout in seconds. Defaults to no timeout.
+        shards:         A list of per-shard overrides for the above parameters.
+                        Defaults to [{}], meaning a single shard (0) which uses
+                        the above parameters.
     """
 
     PERIOD_FORMATS = {
@@ -36,31 +51,39 @@ class RedisBackend(BaseBackend):
         ActivityTracker.PERIOD_MONTHLY: 'monthly-{0:%Y%m}',
     }
 
-    def __init__(self, host='localhost', port=6379, db=0, timeout=None):
-        self.host = host
-        self.port = port
-        self.db = db
-        self.timeout = timeout
+    def __init__(self, host='localhost', port=6379, db=0, socket_timeout=None,
+            shards=None):
+        self.defaults = {
+            'host': host,
+            'port': port,
+            'db': db,
+            'socket_timeout': socket_timeout,
+        }
+        self.shards = shards or [{}]
         self.conns = {}
 
-    def get_conn(self, db):
-        if db is None:
-            db = self.db
-        conn = self.conns.get(db)
+    def get_conn(self, shard):
+        conn = self.conns.get(shard)
         if conn is None:
-            conn = redis.Redis(
-                host=self.host,
-                port=self.port,
-                db=db,
-                socket_timeout=self.timeout)
-            self.conns[db] = conn
+            params = self.defaults.copy()
+            params.update(self.shards[shard])
+            conn = redis.Redis(**params)
+            self.conns[shard] = conn
         return conn
 
     def track(self, period,
             id=None, bucket=None,
             old_id=None, old_bucket=None,
-            date=None, db=None):
-        conn = self.get_conn(db)
+            date=None, shard=0):
+        """Record activity by a specified entity.
+
+        Redis-specific keyword arguments:
+            shard: The shard for this dataset. See class docs for details.
+
+        See activity_tracker.tracker.ActivityTracker for descriptions of the
+        other arguments.
+        """
+        conn = self.get_conn(shard)
         if date is None:
             date = datetime.date.today()
         period_str = self.PERIOD_FORMATS[period].format(date)
@@ -80,8 +103,16 @@ class RedisBackend(BaseBackend):
     def collapse(self, period,
             date=None, max_periods=1,
             buckets=None, aggregate_buckets=None,
-            db=None):
-        conn = self.get_conn(db)
+            shard=0):
+        """Collapse raw data into aggregate counts.
+
+        Redis-specific keyword arguments:
+            shard: The shard for this dataset. See class docs for details.
+
+        See activity_tracker.tracker.ActivityTracker for descriptions of the
+        other arguments.
+        """
+        conn = self.get_conn(shard)
         if date is None:
             date = datetime.date.today()
 
@@ -139,8 +170,16 @@ class RedisBackend(BaseBackend):
                 pipe.delete(key)
             pipe.execute()
 
-    def lookup(self, period, start=None, end=None, buckets=None, db=None):
-        conn = self.get_conn(db)
+    def lookup(self, period, start=None, end=None, buckets=None, shard=0):
+        """Lookup data for a time range.
+
+        Redis-specific keyword arguments:
+            shard: The shard for this dataset. See class docs for details.
+
+        See activity_tracker.tracker.ActivityTracker for descriptions of the
+        other arguments.
+        """
+        conn = self.get_conn(shard)
         if end is None:
             end = datetime.date.today()
         if start is None:
