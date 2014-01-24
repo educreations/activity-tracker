@@ -12,17 +12,23 @@ from ..tracker import ActivityTracker
 
 log = logging.getLogger(__name__)
 
-__all__ = ['RedisActivityTracker']
+__all__ = ['RedisBackend']
 
 
 class RedisBackend(BaseBackend):
     """Redis backend for activity tracker.
 
     This stores data in redis with 2 key formats:
-        track creates keys like:
+        track() creates keys like:
             active:<timeperiod>:raw[:<bucket>] -> set<id>
-        collapse converts them to keys like:
+        collapse() converts them to keys like:
             active:<timeperiod>[:<bucket>] -> count
+
+    Keyword arguments:
+        host:           Default redis host. Defaults to 'localhost'.
+        port:           Default redis port. Defaults to 6379.
+        db:             Default redis db. Defaults to 0.
+        socket_timeout: Socket timeout in seconds. Defaults to no timeout.
     """
 
     PERIOD_FORMATS = {
@@ -94,7 +100,8 @@ class RedisBackend(BaseBackend):
                 break
 
         for period_str in queue:
-            self.collapse_single(buckets or [], aggregate_buckets or {}, conn, period_str)
+            self.collapse_single(
+                buckets or [], aggregate_buckets or {}, conn, period_str)
 
     def collapse_single(self, buckets, aggregate_buckets, conn, period_str):
         log.info('Collapsing activity data for time period %r', period_str)
