@@ -1,14 +1,23 @@
 Activity Tracker
+================
 
-    A library to perform daily-active-user (and similar) tracking.
+A library to perform daily-active-user (and similar) tracking.
 
 
 Installation
+------------
 
-    pip install activity-tracker
+Install the package ``activity-tracker`` from PyPI using `pip`_:
+
+.. code:: bash
+
+    $ pip install -U activity-tracker
 
 
-Basic usage
+Basic Usage
+-----------
+
+.. code:: python
 
     from activity_tracker import ActivityTracker
 
@@ -37,9 +46,12 @@ Basic usage
 
 
 Buckets
+^^^^^^^
 
 You can use multiple buckets for tracking different types of users,
 devices, etc.
+
+.. code:: python
 
     tracker.track(id='random-session-1', bucket='anon')
     tracker.track(id='random-session-2', bucket='anon')
@@ -53,9 +65,12 @@ devices, etc.
 
 
 Changing ids and/or buckets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can also change a user's id and/or bucket, primarily to allow replacing an
 anonymous session id with an authenticated user's id.
+
+.. code:: python
 
     tracker.track(id='random-session-1', bucket='anon')
     tracker.track(id='random-session-2', bucket='anon')
@@ -67,10 +82,13 @@ anonymous session id with an authenticated user's id.
 
 
 Aggregate buckets
+^^^^^^^^^^^^^^^^^
 
 When collapsing data, you can also create aggregate buckets which contain the
 count of the union of 2 or more other buckets. This is useful for computing
 totals of sets of users that may overlap.
+
+.. code:: python
 
     tracker.track(id='user1@example.com', bucket='site1')
     tracker.track(id='jdoe@example.com', bucket='site1')
@@ -81,7 +99,11 @@ totals of sets of users that may overlap.
         buckets=['site1', 'site2'],
         aggregate_buckets={'total': ['site1', 'site2']})
 
-    When looking up data for this day, there will be 3 buckets:
-        site1: 2
-        site2: 2
-        total: 3
+When looking up data for this day, there will be 3 buckets::
+
+    site1: 2
+    site2: 2
+    total: 3
+
+
+.. _`pip`: http://www.pip-installer.org/
