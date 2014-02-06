@@ -7,7 +7,9 @@ A library to perform daily-active-user (and similar) tracking.
 Installation
 ------------
 
-Install the package ``activity-tracker`` from PyPI using `pip`_::
+Install the package ``activity-tracker`` from PyPI using `pip`_:
+
+.. code:: bash
 
     $ pip install -U activity-tracker
 
@@ -15,7 +17,7 @@ Install the package ``activity-tracker`` from PyPI using `pip`_::
 Basic Usage
 -----------
 
-Usage in your app looks like the following::
+.. code:: python
 
     from activity_tracker import ActivityTracker
 
@@ -47,7 +49,9 @@ Buckets
 ^^^^^^^
 
 You can use multiple buckets for tracking different types of users,
-devices, etc.::
+devices, etc.
+
+.. code:: python
 
     tracker.track(id='random-session-1', bucket='anon')
     tracker.track(id='random-session-2', bucket='anon')
@@ -64,7 +68,9 @@ Changing ids and/or buckets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can also change a user's id and/or bucket, primarily to allow replacing an
-anonymous session id with an authenticated user's id.::
+anonymous session id with an authenticated user's id.
+
+.. code:: python
 
     tracker.track(id='random-session-1', bucket='anon')
     tracker.track(id='random-session-2', bucket='anon')
@@ -80,7 +86,9 @@ Aggregate buckets
 
 When collapsing data, you can also create aggregate buckets which contain the
 count of the union of 2 or more other buckets. This is useful for computing
-totals of sets of users that may overlap.::
+totals of sets of users that may overlap.
+
+.. code:: python
 
     tracker.track(id='user1@example.com', bucket='site1')
     tracker.track(id='jdoe@example.com', bucket='site1')
