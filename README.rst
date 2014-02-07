@@ -106,4 +106,10 @@ When looking up data for this day, there will be 3 buckets::
     total: 3
 
 
+License
+-------
+
+Copyright © 2014, Educreations, Inc under the MIT LICENSE.
+
+
 .. _`pip`: http://www.pip-installer.org/
