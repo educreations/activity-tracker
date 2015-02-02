@@ -16,7 +16,8 @@ setup(
     name='activity-tracker',
     version=activity_tracker.__version__,
     description='DAU/MAU tracker',
-    long_description='A library to perform daily-active-user (and similar) tracking',
+    long_description='A library to perform daily-active-user (and similar) '
+                     'tracking',
     packages=find_packages(exclude=['tests']),
     install_requires=[
         # redis backend requires 'redis'

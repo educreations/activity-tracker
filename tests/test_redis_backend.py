@@ -59,9 +59,11 @@ class RedisBackendTestCase(unittest.TestCase):
         track(id=uuid.UUID(UUID2), bucket='anon')
 
         track(id=uuid.UUID(UUID3), bucket='anon')
-        track(id=4, bucket='auth:staff', old_id=uuid.UUID(UUID3), old_bucket='anon')
+        track(id=4, bucket='auth:staff', old_id=uuid.UUID(UUID3),
+              old_bucket='anon')
 
-        track(id=5, bucket='auth:staff', old_id=uuid.UUID(UUID4), old_bucket='anon')
+        track(id=5, bucket='auth:staff', old_id=uuid.UUID(UUID4),
+              old_bucket='anon')
 
         self.check_keys(
             'active:daily-20140101:raw',
