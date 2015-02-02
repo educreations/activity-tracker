@@ -6,4 +6,4 @@ script:
   - "python setup.py test"
 after_success:
   - pip install flake8
-  - flake8
+  - flake8 activity_tracker tests setup.py
