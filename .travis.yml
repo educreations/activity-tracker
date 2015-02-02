@@ -1,0 +1,9 @@
+language: "python"
+python:
+  - "pypy"
+  - "2.7"
+script:
+  - "python setup.py test"
+after_success:
+  - pip install flake8
+  - flake8
