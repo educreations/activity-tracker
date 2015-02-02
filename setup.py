@@ -30,6 +30,7 @@ setup(
     author_email='matt@educreations.com',
     url='https://github.com/educreations/activity-tracker',
     license='MIT',
+    test_suite='tests',
     classifiers=[
         'License :: OSI Approved :: MIT License',
     ],
