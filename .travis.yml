@@ -2,8 +2,12 @@ language: "python"
 python:
   - "pypy"
   - "2.7"
+env:
+  - ACTIVITY_TRACKER_TEST_REAL_REDIS=0
 script:
   - "python setup.py test"
 after_success:
   - pip install flake8
   - flake8 activity_tracker tests setup.py
+services:
+  - redis-server
