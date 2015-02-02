@@ -14,7 +14,7 @@ import redis
 from activity_tracker.backends import redis as redis_backend
 from activity_tracker.tracker import ActivityTracker
 
-import fake_redis
+import fakeredis
 
 REAL_REDIS_ENV = 'ACTIVITY_TRACKER_TEST_REAL_REDIS'
 
@@ -28,7 +28,7 @@ UUID4 = 'd3ba4e99-1e47-3a0e-9c2f-3d9f10a3d1fe'
 class RedisBackendTestCase(unittest.TestCase):
     def setUp(self):
         if REAL_REDIS_ENV not in os.environ:
-            redis_backend.redis = fake_redis
+            redis_backend.redis.Redis = fakeredis.FakeRedis
         self.backend = redis_backend.RedisBackend(
             db=int(os.environ.get(REAL_REDIS_ENV, '0')))
         self.conn = self.backend.get_conn(0)
@@ -59,9 +59,11 @@ class RedisBackendTestCase(unittest.TestCase):
         track(id=uuid.UUID(UUID2), bucket='anon')
 
         track(id=uuid.UUID(UUID3), bucket='anon')
-        track(id=4, bucket='auth:staff', old_id=uuid.UUID(UUID3), old_bucket='anon')
+        track(id=4, bucket='auth:staff', old_id=uuid.UUID(UUID3),
+              old_bucket='anon')
 
-        track(id=5, bucket='auth:staff', old_id=uuid.UUID(UUID4), old_bucket='anon')
+        track(id=5, bucket='auth:staff', old_id=uuid.UUID(UUID4),
+              old_bucket='anon')
 
         self.check_keys(
             'active:daily-20140101:raw',

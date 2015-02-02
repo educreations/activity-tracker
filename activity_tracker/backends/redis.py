@@ -52,7 +52,7 @@ class RedisBackend(BaseBackend):
     }
 
     def __init__(self, host='localhost', port=6379, db=0, socket_timeout=None,
-            shards=None):
+                 shards=None):
         self.defaults = {
             'host': host,
             'port': port,
@@ -72,9 +72,9 @@ class RedisBackend(BaseBackend):
         return conn
 
     def track(self, period,
-            id=None, bucket=None,
-            old_id=None, old_bucket=None,
-            date=None, shard=0):
+              id=None, bucket=None,
+              old_id=None, old_bucket=None,
+              date=None, shard=0):
         """Record activity by a specified entity.
 
         Redis-specific keyword arguments:
@@ -101,9 +101,9 @@ class RedisBackend(BaseBackend):
             conn.srem(old_key, str(old_id))
 
     def collapse(self, period,
-            date=None, max_periods=1,
-            buckets=None, aggregate_buckets=None,
-            shard=0):
+                 date=None, max_periods=1,
+                 buckets=None, aggregate_buckets=None,
+                 shard=0):
         """Collapse raw data into aggregate counts.
 
         Redis-specific keyword arguments:
@@ -145,7 +145,7 @@ class RedisBackend(BaseBackend):
             to_remove.add(in_key)
         for agg_bucket, sources in aggregate_buckets.iteritems():
             in_keys = [make_key('active', period_str, 'raw', source)
-                for source in sources]
+                       for source in sources]
             out_key = make_key('active', period_str, agg_bucket)
             if len(sources) == 1:
                 to_set[out_key] = conn.scard(in_keys[0])
