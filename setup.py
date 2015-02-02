@@ -23,6 +23,7 @@ setup(
         # redis backend requires 'redis'
     ],
     tests_require=[
+        'fakeredis',
         'nose>=1.0',
         'redis',
     ],
