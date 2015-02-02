@@ -200,8 +200,9 @@ class RedisBackend(BaseBackend):
                 keys.append(make_key('active', period_str, bucket))
                 result_map.append((period_result, bucket))
 
+        values = conn.mget(keys) if keys else []
         for (period_result, bucket), value in itertools.izip(
-                result_map, conn.mget(keys)):
+                result_map, values):
             period_result[bucket] = int(value) if value is not None else 0
         return result
 

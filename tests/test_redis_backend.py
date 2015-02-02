@@ -126,3 +126,10 @@ class RedisBackendTestCase(unittest.TestCase):
             end=datetime.date(2014, 2, 5),
             buckets=['group1', 'group2'],
         ))
+
+    def test_lookup_no_values(self):
+        self.assertEqual([], self.backend.lookup(
+            ActivityTracker.PERIOD_MONTHLY,
+            start=datetime.date(2013, 10, 5),
+            end=datetime.date(2013, 10, 5),
+        ))
