@@ -109,7 +109,7 @@ When looking up data for this day, there will be 3 buckets::
 License
 -------
 
-Copyright © 2015, Educreations, Inc under the MIT LICENSE.
+Copyright © 2023, Educreations, Inc under the MIT LICENSE.
 
 
 .. _`pip`: http://www.pip-installer.org/

@@ -1,8 +1,11 @@
+from __future__ import absolute_import
+
 import importlib
+import six
 
 from .backends.base import BaseBackend
 
-__all__ = ['ActivityTracker']
+__all__ = ["ActivityTracker"]
 
 
 class ActivityTracker(object):
@@ -21,8 +24,8 @@ class ActivityTracker(object):
     Any additional keyword arguments are passed to the backend's constructor.
     """
 
-    PERIOD_DAILY = 'daily'
-    PERIOD_MONTHLY = 'monthly'
+    PERIOD_DAILY = "daily"
+    PERIOD_MONTHLY = "monthly"
 
     def __init__(self, periods=None, backend=None, **kwargs):
         self._periods = periods
@@ -31,17 +34,19 @@ class ActivityTracker(object):
             self._backend = backend
             if kwargs:
                 raise ValueError(
-                    'Cannot pass backend keyword arguments when providing a '
-                    'backend instance.')
-        elif isinstance(backend, basestring):
-            if '.' not in backend:
-                backend = 'activity_tracker.backends.{}.{}Backend'.format(
-                    backend, backend.title())
-            module_name, class_name = backend.rsplit('.', 1)
+                    "Cannot pass backend keyword arguments when providing a "
+                    "backend instance."
+                )
+        elif isinstance(backend, six.string_types):
+            if "." not in backend:
+                backend = "activity_tracker.backends.{}.{}Backend".format(
+                    backend, backend.title()
+                )
+            module_name, class_name = backend.rsplit(".", 1)
             module = importlib.import_module(module_name)
             self._backend = getattr(module, class_name)(**kwargs)
         else:
-            raise TypeError('Invalid backend')
+            raise TypeError("Invalid backend")
 
     #
     # Track
