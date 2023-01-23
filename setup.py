@@ -20,6 +20,7 @@ setup(
     packages=find_packages(exclude=["tests"]),
     install_requires=[
         # redis backend requires 'redis'
+        "six",
     ],
     tests_require=[
         "fakeredis",
