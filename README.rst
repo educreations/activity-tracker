@@ -19,7 +19,7 @@ Basic Usage
 
 .. code:: python
 
-    from activity_tracker import ActivityTracker
+    from activity_tracker.tracker import ActivityTracker
 
     tracker = ActivityTracker(
         periods=[ActivityTracker.PERIOD_DAILY],
