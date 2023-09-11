@@ -1,4 +1,5 @@
-"""Tests for the activity tracker redis backend.
+"""
+Tests for the activity tracker redis backend.
 
 To test with a real redis server instead of the builtin fake server, set the
 ACTIVITY_TRACKER_TEST_REAL_REDIS environment variable to the number of a local
@@ -9,12 +10,11 @@ import os
 import unittest
 import uuid
 
-import redis
+from fakeredis import FakeStrictRedis
+import six
 
 from activity_tracker.backends import redis as redis_backend
 from activity_tracker.tracker import ActivityTracker
-
-import fakeredis
 
 REAL_REDIS_ENV = "ACTIVITY_TRACKER_TEST_REAL_REDIS"
 
@@ -25,26 +25,48 @@ UUID3 = "eb05ee25-807f-3d40-b853-674cf25a1d46"
 UUID4 = "d3ba4e99-1e47-3a0e-9c2f-3d9f10a3d1fe"
 
 
+def force_text(s, encoding="utf-8"):
+    # Handle the common case first for performance reasons.
+    if issubclass(type(s), six.text_type):
+        return s
+
+    if not issubclass(type(s), six.string_types):
+        if six.PY3:
+            if isinstance(s, bytes):
+                s = six.text_type(s, encoding)
+            else:
+                s = six.text_type(s)
+        elif hasattr(s, "__unicode__"):
+            s = six.text_type(s)
+        else:
+            s = six.text_type(bytes(s), encoding)
+    else:
+        # Note: We use .decode() here, instead of six.text_type(s, encoding,
+        # errors), so that if s is a SafeBytes, it ends up being a
+        # SafeText at the end.
+        s = six.text_type(s, encoding)
+
+    return s
+
+
 class RedisBackendTestCase(unittest.TestCase):
     def setUp(self):
-        if REAL_REDIS_ENV not in os.environ:
-            redis_backend.redis.Redis = fakeredis.FakeRedis
         self.backend = redis_backend.RedisBackend(
-            db=int(os.environ.get(REAL_REDIS_ENV, "0"))
+            db=int(os.environ.get(REAL_REDIS_ENV, "0")), redis_client=FakeStrictRedis
         )
         self.conn = self.backend.get_conn(0)
         self.conn.flushdb()
 
     def tearDown(self):
-        if REAL_REDIS_ENV not in os.environ:
-            redis_backend.redis = redis
         self.conn.flushdb()
 
     def check_keys(self, *keys):
-        self.assertEqual(set(keys), set(self.conn.keys()))
+        conn_keys = [t for t in map(force_text, self.conn.keys())]
+        self.assertEqual(set(keys), set(conn_keys))
 
     def check_set(self, key, *args):
-        self.assertEqual(set(args), self.conn.smembers(key))
+        conn_keys = [t for t in map(force_text, self.conn.smembers(key))]
+        self.assertEqual(set(args), set(conn_keys))
 
     def test_track(self):
         def track(**kwargs):
@@ -102,12 +124,12 @@ class RedisBackendTestCase(unittest.TestCase):
             "active:daily-20140101:agg3",
             "active:daily-20140102:raw:group1",
         )
-        self.assertEqual("3", self.conn.get("active:daily-20140101:group1"))
-        self.assertEqual("3", self.conn.get("active:daily-20140101:group2"))
-        self.assertEqual("4", self.conn.get("active:daily-20140101:group3"))
-        self.assertEqual("3", self.conn.get("active:daily-20140101:agg1"))
-        self.assertEqual("5", self.conn.get("active:daily-20140101:agg2"))
-        self.assertEqual("6", self.conn.get("active:daily-20140101:agg3"))
+        self.assertEqual("3", force_text(self.conn.get("active:daily-20140101:group1")))
+        self.assertEqual("3", force_text(self.conn.get("active:daily-20140101:group2")))
+        self.assertEqual("4", force_text(self.conn.get("active:daily-20140101:group3")))
+        self.assertEqual("3", force_text(self.conn.get("active:daily-20140101:agg1")))
+        self.assertEqual("5", force_text(self.conn.get("active:daily-20140101:agg2")))
+        self.assertEqual("6", force_text(self.conn.get("active:daily-20140101:agg3")))
 
     def test_lookup(self):
         self.conn.set("active:monthly-201310:group1", "83")

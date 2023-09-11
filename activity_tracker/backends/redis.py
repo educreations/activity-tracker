@@ -2,10 +2,10 @@ from __future__ import absolute_import
 
 import datetime
 import hashlib
-import itertools
 import logging
+import six
 
-import redis
+from redis import StrictRedis
 
 from .base import BaseBackend
 from ..tracker import ActivityTracker
@@ -52,7 +52,13 @@ class RedisBackend(BaseBackend):
     }
 
     def __init__(
-        self, host="localhost", port=6379, db=0, socket_timeout=None, shards=None
+        self,
+        host="localhost",
+        port=6379,
+        db=0,
+        socket_timeout=None,
+        shards=None,
+        redis_client=None,
     ):
         self.defaults = {
             "host": host,
@@ -62,13 +68,14 @@ class RedisBackend(BaseBackend):
         }
         self.shards = shards or [{}]
         self.conns = {}
+        self.redis_client = redis_client or StrictRedis
 
     def get_conn(self, shard):
         conn = self.conns.get(shard)
         if conn is None:
             params = self.defaults.copy()
             params.update(self.shards[shard])
-            conn = redis.Redis(**params)
+            conn = self.redis_client(**params)
             self.conns[shard] = conn
         return conn
 
@@ -156,7 +163,7 @@ class RedisBackend(BaseBackend):
             out_key = make_key("active", period_str, bucket)
             to_set[out_key] = conn.scard(in_key)
             to_remove.add(in_key)
-        for agg_bucket, sources in aggregate_buckets.iteritems():
+        for agg_bucket, sources in six.iteritems(aggregate_buckets):
             in_keys = [
                 make_key("active", period_str, "raw", source) for source in sources
             ]
@@ -180,7 +187,7 @@ class RedisBackend(BaseBackend):
             to_remove.update(in_keys)
 
         with conn.pipeline() as pipe:
-            for key, value in to_set.iteritems():
+            for key, value in six.iteritems(to_set):
                 pipe.set(key, value)
             for key in to_remove:
                 pipe.delete(key)
@@ -216,8 +223,7 @@ class RedisBackend(BaseBackend):
                 keys.append(make_key("active", period_str, bucket))
                 result_map.append((period_result, bucket))
 
-        values = conn.mget(keys) if keys else []
-        for (period_result, bucket), value in itertools.izip(
+        for (period_result, bucket), value in six.moves.zip(
             result_map, conn.mget(keys)
         ):
             period_result[bucket] = int(value) if value is not None else 0
@@ -229,7 +235,7 @@ def make_key(*pieces):
 
 
 def make_temp_key(temp_type, pieces):
-    md5 = hashlib.md5(" ".join(pieces)).hexdigest()
+    md5 = hashlib.md5(six.b(" ".join(pieces))).hexdigest()
     return make_key("temp", temp_type, md5)
 
 

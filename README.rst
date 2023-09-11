@@ -19,6 +19,8 @@ Basic Usage
 
 .. code:: python
 
+    import six
+
     from activity_tracker.tracker import ActivityTracker
 
     tracker = ActivityTracker(
@@ -41,7 +43,7 @@ Basic Usage
     week_ago = today - datetime.timedelta(days=7)
     for date, date_data in tracker.lookup_daily(start=week_ago, end=today):
         print date
-        for bucket, count in date_data.iteritems():
+        for bucket, count in six.iteritems(date_data):
             print '  {}: {}'.format(bucket, count)
 
 

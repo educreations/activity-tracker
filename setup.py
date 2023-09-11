@@ -22,16 +22,13 @@ setup(
         # redis backend requires 'redis'
         "six",
     ],
-    tests_require=[
-        "fakeredis",
-        "nose>=1.0",
-        "redis",
-    ],
+    tests_require=["activity-tracker[test]"],
     author="Matthew Eastman",
     author_email="matt@educreations.com",
     url="https://github.com/educreations/activity-tracker",
     license="MIT",
     test_suite="tests",
+    extras_require={"test": ["pytest", "pytest-django", "fakeredis", "flake8"]},
     classifiers=[
         "License :: OSI Approved :: MIT License",
     ],
