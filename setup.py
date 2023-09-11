@@ -4,8 +4,6 @@ import os
 import sys
 from setuptools import setup, find_packages
 
-import activity_tracker
-
 
 if sys.argv[-1] == "publish":
     os.system("python setup.py register sdist bdist_wheel upload")
@@ -14,7 +12,7 @@ if sys.argv[-1] == "publish":
 
 setup(
     name="activity-tracker",
-    version=activity_tracker.__version__,
+    version="0.0.5",
     description="DAU/MAU tracker",
     long_description="A library to perform daily-active-user (and similar) tracking",
     packages=find_packages(exclude=["tests"]),
